@@ -2,14 +2,14 @@ const express = require('express');
 const dotenv = require('dotenv');
 const app = express();
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 dotenv.config();
 const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 const uri = process.env.MONGODB_URI;
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -26,6 +26,33 @@ async function run() {
     app.post('/destinations', async (req, res) => {
         const newDestination = req.body;
         const result = await collection.insertOne(newDestination);
+        res.json(result);
+    })
+
+    app.get('/destinations', async (req, res) => {
+        const cursor = collection.find({});
+        const result = await cursor.toArray();
+        res.json(result);
+    })
+    app.get('/destinations/:id', async (req, res) => {
+        const {id} = req.params;
+        const query = { _id: new ObjectId(id) };
+        const result = await collection.findOne(query);
+        res.json(result);
+    })
+    app.patch('/destinations/:id', async (req, res) => {
+        const {id} = req.params;
+        const update = req.body;
+        const query = { _id: new ObjectId(id) };
+        const result = await collection.updateOne(query, {
+            $set: update
+        });
+        res.json(result);
+    })
+    app.delete('/destinations/:id', async (req, res) => {
+        const {id} = req.params;
+        const query = { _id: new ObjectId(id) };
+        const result = await collection.deleteOne(query);
         res.json(result);
     })
 
