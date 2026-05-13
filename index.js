@@ -22,6 +22,7 @@ async function run() {
     await client.connect();
     const database = client.db("wanderlust");
     const collection = database.collection("destinations");
+    const bookingCollection = database.collection("bookings");
 
     app.post('/destinations', async (req, res) => {
         const newDestination = req.body;
@@ -55,6 +56,11 @@ async function run() {
         const result = await collection.deleteOne(query);
         res.json(result);
     })
+    app.post('/bookings', async (req, res) => {
+        const newBooking = req.body;
+        const result = await bookingCollection.insertOne(newBooking);
+        res.json(result);
+    })
 
 
     await client.db("admin").command({ ping: 1 });
@@ -68,5 +74,5 @@ run().catch(console.dir);
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
 app.get('/', (req, res) => 
-    res.send('Hello World!')
+    res.send('Wanderlust Server is running!')
 );
