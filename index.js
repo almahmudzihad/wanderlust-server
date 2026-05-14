@@ -18,7 +18,7 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
-const JWKS = createRemoteJWKSet(new URL('http://localhost:3001/api/auth/jwks'));
+const JWKS = createRemoteJWKSet(new URL(`${process.env.CLIENT_URI}/api/auth/jwks`));
 const verifyToken = async (req, res, next) => {
     const authheader = req?.headers.authorization;
     if (!authheader) {
@@ -40,7 +40,7 @@ const verifyToken = async (req, res, next) => {
 }
 async function run() {
   try {
-    await client.connect();
+   // await client.connect();
     const database = client.db("wanderlust");
     const collection = database.collection("destinations");
     const bookingCollection = database.collection("bookings");
@@ -77,19 +77,19 @@ async function run() {
         const result = await collection.deleteOne(query);
         res.json(result);
     })
-    app.post('/bookings', async (req, res) => {
+    app.post('/bookings', verifyToken, async (req, res) => {
         const newBooking = req.body;
         const result = await bookingCollection.insertOne(newBooking);
         res.json(result);
     })
-    app.get('/bookings/:userId', async (req, res) => {
+    app.get('/bookings/:userId', verifyToken, async (req, res) => {
         const {userId} = req.params;
         const query = { userId: userId };
         const cursor = bookingCollection.find(query);
         const result = await cursor.toArray();
         res.json(result);
     })
-    app.delete('/bookings/:id', async (req, res) => {
+    app.delete('/bookings/:id', verifyToken, async (req, res) => {
         const {id} = req.params;
         const query = { _id: new ObjectId(id) };
         const result = await bookingCollection.deleteOne(query);
@@ -97,7 +97,7 @@ async function run() {
     })
 
 
-    await client.db("admin").command({ ping: 1 });
+    //await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     //await client.close();
