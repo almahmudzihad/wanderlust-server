@@ -35,7 +35,14 @@ async function run() {
         const result = await cursor.toArray();
         res.json(result);
     })
-    app.get('/destinations/:id', async (req, res) => {
+    app.get('/destinations/:id', (req, res, next) =>{
+        const header = req.headers.authorization;
+        console.log(header);
+        next();
+        
+        
+        
+    }, async (req, res) => {
         const {id} = req.params;
         const query = { _id: new ObjectId(id) };
         const result = await collection.findOne(query);
@@ -50,7 +57,7 @@ async function run() {
         });
         res.json(result);
     })
-    app.delete('/destinations/:id', async (req, res) => {
+    app.delete('/destinations/:id' , async (req, res) => {
         const {id} = req.params;
         const query = { _id: new ObjectId(id) };
         const result = await collection.deleteOne(query);
@@ -59,6 +66,19 @@ async function run() {
     app.post('/bookings', async (req, res) => {
         const newBooking = req.body;
         const result = await bookingCollection.insertOne(newBooking);
+        res.json(result);
+    })
+    app.get('/bookings/:userId', async (req, res) => {
+        const {userId} = req.params;
+        const query = { userId: userId };
+        const cursor = bookingCollection.find(query);
+        const result = await cursor.toArray();
+        res.json(result);
+    })
+    app.delete('/bookings/:id', async (req, res) => {
+        const {id} = req.params;
+        const query = { _id: new ObjectId(id) };
+        const result = await bookingCollection.deleteOne(query);
         res.json(result);
     })
 
