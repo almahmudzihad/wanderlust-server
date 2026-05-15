@@ -45,6 +45,15 @@ async function run() {
     const collection = database.collection("destinations");
     const bookingCollection = database.collection("bookings");
 
+    app.get('/features', async (req, res) => {
+
+    const result = await collection.aggregate([
+        { $sample: { size: 4 } }
+        ]).toArray();
+
+    res.json(result);
+    });
+
     app.post('/destinations', async (req, res) => {
         const newDestination = req.body;
         const result = await collection.insertOne(newDestination);
